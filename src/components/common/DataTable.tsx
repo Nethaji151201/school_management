@@ -12,6 +12,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableFooter,
   TableHead,
   TableRow,
   Tooltip,
@@ -22,8 +23,7 @@ import {
 import { styled } from "@mui/material/styles";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import ClearIcon from "@mui/icons-material/Clear";
 import CustomTextField from "./CustomTextField";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -103,6 +103,38 @@ const compare = (a: any, b: any, order: "asc" | "desc") => {
   if (a < b) return order === "asc" ? -1 : 1;
   if (a > b) return order === "asc" ? 1 : -1;
   return 0;
+};
+
+const getVisiblePages = (
+  currentPage: number,
+  totalPages: number,
+): (number | "ellipsis")[] => {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, index) => index);
+  }
+
+  const pages: (number | "ellipsis")[] = [0];
+
+  if (currentPage > 2) {
+    pages.push("ellipsis");
+  }
+
+  const start = Math.max(1, currentPage - 1);
+  const end = Math.min(totalPages - 2, currentPage + 1);
+
+  for (let pageIndex = start; pageIndex <= end; pageIndex += 1) {
+    pages.push(pageIndex);
+  }
+
+  if (currentPage < totalPages - 3) {
+    pages.push("ellipsis");
+  }
+
+  if (totalPages > 1) {
+    pages.push(totalPages - 1);
+  }
+
+  return pages;
 };
 
 const DataTable = <T extends Record<string, any>>({
@@ -462,15 +494,168 @@ const DataTable = <T extends Record<string, any>>({
     }
 
     if (orderBy !== columnKey) {
-      return <ArrowDownwardIcon sx={{ fontSize: 14, opacity: 0.4 }} />;
+      return (
+        <UnfoldMoreIcon
+          sx={{ fontSize: 16, color: "text.disabled", ml: 0.5 }}
+        />
+      );
     }
 
     return order === "asc" ? (
-      <ArrowUpwardIcon sx={{ fontSize: 14, opacity: 0.8 }} />
+      <ArrowUpwardIcon sx={{ fontSize: 14, color: "primary.main", ml: 0.5 }} />
     ) : (
-      <ArrowDownwardIcon sx={{ fontSize: 14, opacity: 0.8 }} />
+      <ArrowDownwardIcon
+        sx={{ fontSize: 14, color: "primary.main", ml: 0.5 }}
+      />
     );
   };
+
+  const paginationState = useMemo(() => {
+    const currentPage = pagination ? pagination.page : page;
+    const currentLimit = pagination ? pagination.limit : rowsPerPage;
+    const effectiveLimit =
+      currentLimit === -1 ? Math.max(totalRows, 1) : currentLimit;
+    const totalPages = Math.max(Math.ceil(totalRows / effectiveLimit), 1);
+
+    if (totalRows === 0) {
+      return {
+        currentPage,
+        currentLimit,
+        effectiveLimit,
+        totalPages,
+        start: 0,
+        end: 0,
+      };
+    }
+
+    const start = currentPage * effectiveLimit + 1;
+    const end = Math.min((currentPage + 1) * effectiveLimit, totalRows);
+
+    return {
+      currentPage,
+      currentLimit,
+      effectiveLimit,
+      totalPages,
+      start,
+      end,
+    };
+  }, [pagination, page, rowsPerPage, totalRows]);
+
+  const headerCellSx = {
+    fontWeight: 700,
+    color: "text.primary",
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    borderTop: "none",
+    p: 1,
+    backgroundColor: "background.paper",
+    whiteSpace: "nowrap" as const,
+  };
+
+  const bodyCellSx = {
+    p: 1,
+    color: "text.secondary",
+    borderBottom: `1px solid ${alpha(theme.palette.divider, 0.7)}`,
+  };
+
+  const paginationButtonSx = (isActive: boolean, isDisabled = false) => ({
+    minWidth: 40,
+    px: 1.5,
+    py: 0.75,
+    borderRadius: 0,
+    border: `1px solid ${alpha(theme.palette.divider, 0.9)}`,
+    ml: "-1px",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    lineHeight: 1.5,
+    textTransform: "none" as const,
+    boxShadow: "none",
+    ...(isActive
+      ? {
+          backgroundColor: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
+          zIndex: 1,
+          "&:hover": {
+            backgroundColor: theme.palette.primary.dark,
+            boxShadow: "none",
+          },
+        }
+      : {
+          backgroundColor: alpha(theme.palette.primary.main, 0.08),
+          color: theme.palette.primary.main,
+          "&:hover": {
+            backgroundColor: alpha(theme.palette.primary.main, 0.16),
+            boxShadow: "none",
+          },
+        }),
+    ...(isDisabled && {
+      opacity: 0.45,
+      pointerEvents: "none" as const,
+    }),
+  });
+
+  const renderHeaderCells = () => (
+    <>
+      {selectable && (
+        <TableCell padding="checkbox" sx={headerCellSx}>
+          <Checkbox
+            color="primary"
+            checked={isAllSelected}
+            onChange={handleSelectAll}
+            indeterminate={
+              selectedKeys.length > 0 &&
+              selectedKeys.length < currentPageData.length
+            }
+          />
+        </TableCell>
+      )}
+      {serialNumber && (
+        <TableCell align="left" sx={headerCellSx}>
+          #
+        </TableCell>
+      )}
+      {headers.map((header) => (
+        <TableCell
+          key={header.key}
+          align={header.align ?? "left"}
+          sx={{
+            ...headerCellSx,
+            minWidth: header.minWidth ?? 120,
+            cursor: header.sortable ? "pointer" : "default",
+          }}
+          onClick={() => handleSort(header.key, header.sortable)}
+        >
+          <Box sx={{ display: "inline-flex", alignItems: "center" }}>
+            {header.label}
+            {renderSortIcon(header.key, header.sortable)}
+          </Box>
+        </TableCell>
+      ))}
+    </>
+  );
+
+  const renderFooterCells = () => (
+    <>
+      {selectable && <TableCell padding="checkbox" sx={headerCellSx} />}
+      {serialNumber && (
+        <TableCell align="left" sx={headerCellSx}>
+          #
+        </TableCell>
+      )}
+      {headers.map((header) => (
+        <TableCell
+          key={`footer-${header.key}`}
+          align={header.align ?? "left"}
+          sx={{
+            ...headerCellSx,
+            minWidth: header.minWidth ?? 120,
+            cursor: "default",
+          }}
+        >
+          {header.label}
+        </TableCell>
+      ))}
+    </>
+  );
 
   return (
     <DataTableWrapper elevation={0}>
@@ -481,99 +666,27 @@ const DataTable = <T extends Record<string, any>>({
           gap: 2,
           alignItems: "center",
           justifyContent: "space-between",
-          p: 1.5,
+          px: 2,
+          py: 1.75,
         }}
       >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "9fr 3fr",
-            gap: 2,
-            alignItems: "center",
-          }}
-        >
-          <Box>
-            <CustomTextField
-              fullWidth
-              value={searchQuery}
-              onChange={(event) => {
-                setSearchQuery(event.target.value);
-                if (!pagination) {
-                  setPage(0);
-                }
-              }}
-              placeholder="Search records"
-            />
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
-            }}
-          >
-            <Button variant="contained" onClick={openExportMenu} size="small">
-              Export
-            </Button>
-
-            <Menu
-              anchorEl={exportAnchorEl}
-              open={Boolean(exportAnchorEl)}
-              onClose={closeExportMenu}
-            >
-              <MenuItem onClick={() => handleExportOption("csv")}>
-                <DownloadIcon
-                  sx={{ fontSize: 16, mr: 1, color: "primary.main" }}
-                />
-                CSV
-              </MenuItem>
-
-              <MenuItem onClick={() => handleExportOption("xls")}>
-                <AttachFileIcon
-                  sx={{
-                    fontSize: 16,
-                    mr: 1,
-                    color: "primary.main",
-                  }}
-                />
-                XLS
-              </MenuItem>
-
-              <MenuItem onClick={() => handleExportOption("pdf")}>
-                <PictureAsPdfIcon
-                  sx={{ fontSize: 16, mr: 1, color: "primary.main" }}
-                />
-                PDF
-              </MenuItem>
-
-              <MenuItem onClick={() => handleExportOption("print")}>
-                <PrintIcon
-                  sx={{ fontSize: 16, mr: 1, color: "primary.main" }}
-                />
-                Print
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Box>
-
-        {(enablePagination || pagination) && !enableInfiniteScroll && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              flexShrink: 0,
-            }}
-          >
-            <Typography variant="body2" sx={{ whiteSpace: "nowrap" }}>
-              Rows per page:
+        {(enablePagination || pagination) && !enableInfiniteScroll ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Show
             </Typography>
             <Select
               size="small"
               value={pagination ? pagination.limit : rowsPerPage}
               onChange={(e) => handleChangeRowsPerPage(e as any)}
-              sx={{ minWidth: 70, height: 36 }}
+              sx={{
+                minWidth: 72,
+                height: 32,
+                fontSize: "0.875rem",
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: alpha(theme.palette.divider, 0.9),
+                },
+              }}
             >
               {rowsPerPageOptions.map((option) => {
                 const value =
@@ -587,70 +700,94 @@ const DataTable = <T extends Record<string, any>>({
                 );
               })}
             </Select>
-
-            <Typography variant="body2" sx={{ ml: 2, whiteSpace: "nowrap" }}>
-              {(() => {
-                const currentPage = pagination ? pagination.page : page;
-                const currentLimit = pagination
-                  ? pagination.limit
-                  : rowsPerPage;
-                const effectiveLimit =
-                  currentLimit === -1 ? totalRows : currentLimit;
-                const start = currentPage * effectiveLimit + 1;
-                const end = Math.min(
-                  (currentPage + 1) * effectiveLimit,
-                  totalRows,
-                );
-                return `${start}-${end} of ${totalRows}`;
-              })()}
+            <Typography variant="body2" color="text.secondary">
+              entries
             </Typography>
-
-            <IconButton
-              size="small"
-              onClick={() => {
-                const currentPage = pagination ? pagination.page : page;
-                if (currentPage > 0) {
-                  handleChangePage(null, currentPage - 1);
-                }
-              }}
-              disabled={(pagination ? pagination.page : page) === 0}
-            >
-              <ChevronLeftIcon fontSize="small" />
-            </IconButton>
-
-            <IconButton
-              size="small"
-              onClick={() => {
-                const currentPage = pagination ? pagination.page : page;
-                const currentLimit = pagination
-                  ? pagination.limit
-                  : rowsPerPage;
-                const effectiveLimit =
-                  currentLimit === -1 ? totalRows : currentLimit;
-                const maxPage = Math.ceil(totalRows / effectiveLimit) - 1;
-                if (currentPage < maxPage) {
-                  handleChangePage(null, currentPage + 1);
-                }
-              }}
-              disabled={(() => {
-                const currentPage = pagination ? pagination.page : page;
-                const currentLimit = pagination
-                  ? pagination.limit
-                  : rowsPerPage;
-                const effectiveLimit =
-                  currentLimit === -1 ? totalRows : currentLimit;
-                const maxPage = Math.ceil(totalRows / effectiveLimit) - 1;
-                return currentPage >= maxPage;
-              })()}
-            >
-              <ChevronRightIcon fontSize="small" />
-            </IconButton>
           </Box>
+        ) : (
+          <Box />
         )}
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            flexWrap: "wrap",
+            ml: "auto",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" color="text.secondary">
+              Search:
+            </Typography>
+            <CustomTextField
+              value={searchQuery}
+              onChange={(event) => {
+                setSearchQuery(event.target.value);
+                if (!pagination) {
+                  setPage(0);
+                }
+              }}
+              placeholder=""
+              size="small"
+              sx={{ width: 220 }}
+            />
+          </Box>
+
+          <Button variant="contained" onClick={openExportMenu} size="small">
+            Export
+          </Button>
+
+          <Menu
+            anchorEl={exportAnchorEl}
+            open={Boolean(exportAnchorEl)}
+            onClose={closeExportMenu}
+          >
+            <MenuItem onClick={() => handleExportOption("csv")}>
+              <DownloadIcon
+                sx={{ fontSize: 16, mr: 1, color: "primary.main" }}
+              />
+              CSV
+            </MenuItem>
+
+            <MenuItem onClick={() => handleExportOption("xls")}>
+              <AttachFileIcon
+                sx={{
+                  fontSize: 16,
+                  mr: 1,
+                  color: "primary.main",
+                }}
+              />
+              XLS
+            </MenuItem>
+
+            <MenuItem onClick={() => handleExportOption("pdf")}>
+              <PictureAsPdfIcon
+                sx={{ fontSize: 16, mr: 1, color: "primary.main" }}
+              />
+              PDF
+            </MenuItem>
+
+            <MenuItem onClick={() => handleExportOption("print")}>
+              <PrintIcon sx={{ fontSize: 16, mr: 1, color: "primary.main" }} />
+              Print
+            </MenuItem>
+          </Menu>
+        </Box>
       </Box>
 
       <TableContainer sx={{ maxHeight: scrollHeight, minHeight: 240 }}>
-        <Table stickyHeader>
+        <Table
+          stickyHeader
+          sx={{
+            borderCollapse: "collapse",
+            "& .MuiTableCell-root": {
+              borderLeft: "none",
+              borderRight: "none",
+            },
+          }}
+        >
           <TableHead>
             {enableColumnSearch && (
               <TableRow>
@@ -716,45 +853,7 @@ const DataTable = <T extends Record<string, any>>({
                 )}
               </TableRow>
             )}
-            <TableRow>
-              {selectable && (
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    color="primary"
-                    checked={isAllSelected}
-                    onChange={handleSelectAll}
-                    indeterminate={
-                      selectedKeys.length > 0 &&
-                      selectedKeys.length < currentPageData.length
-                    }
-                  />
-                </TableCell>
-              )}
-              {serialNumber && (
-                <TableCell align="center" sx={{ p: 1.5 }}>
-                  #
-                </TableCell>
-              )}
-              {headers.map((header) => (
-                <TableCell
-                  key={header.key}
-                  align={header.align ?? "center"}
-                  sx={{
-                    minWidth: header.minWidth ?? 120,
-                    cursor: header.sortable ? "pointer" : "default",
-                    p: 1.5,
-                  }}
-                  onClick={() => handleSort(header.key, header.sortable)}
-                >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                      {header.label}
-                    </Typography>
-                    {renderSortIcon(header.key, header.sortable)}
-                  </Box>
-                </TableCell>
-              ))}
-            </TableRow>
+            <TableRow>{renderHeaderCells()}</TableRow>
           </TableHead>
           <TableBody>
             {isLoading && (
@@ -801,15 +900,15 @@ const DataTable = <T extends Record<string, any>>({
                     onClick={() => onRowClick?.(row)}
                     sx={{
                       cursor: onRowClick ? "pointer" : "default",
-                      backgroundColor:
-                        rowIndex % 2 === 0
-                          ? alpha(theme.palette.action.selected, 0.03)
-                          : "transparent",
+                      "&:last-child td": {
+                        borderBottom: "none",
+                      },
                     }}
                   >
                     {selectable && (
                       <TableCell
                         padding="checkbox"
+                        sx={bodyCellSx}
                         onClick={(event) => event.stopPropagation()}
                       >
                         <Checkbox
@@ -820,7 +919,7 @@ const DataTable = <T extends Record<string, any>>({
                       </TableCell>
                     )}
                     {serialNumber && (
-                      <TableCell align="center" sx={{ p: 1 }}>
+                      <TableCell align="left" sx={bodyCellSx}>
                         {rowIndex +
                           1 +
                           (pagination
@@ -832,7 +931,7 @@ const DataTable = <T extends Record<string, any>>({
                       <TableCell
                         key={header.key}
                         align={header.align ?? "left"}
-                        sx={{ p: 1 }}
+                        sx={bodyCellSx}
                       >
                         {header.render
                           ? header.render(row)
@@ -843,8 +942,99 @@ const DataTable = <T extends Record<string, any>>({
                 );
               })}
           </TableBody>
+          <TableFooter>
+            <TableRow>{renderFooterCells()}</TableRow>
+          </TableFooter>
         </Table>
       </TableContainer>
+
+      {(enablePagination || pagination) && !enableInfiniteScroll && (
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            px: 2,
+            py: 1.75,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Showing {paginationState.start} to {paginationState.end} of{" "}
+            {totalRows} entries
+          </Typography>
+
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Button
+              size="small"
+              onClick={() =>
+                handleChangePage(null, paginationState.currentPage - 1)
+              }
+              disabled={paginationState.currentPage === 0}
+              sx={{
+                ...paginationButtonSx(false, paginationState.currentPage === 0),
+                borderTopLeftRadius: 4,
+                borderBottomLeftRadius: 4,
+                ml: 0,
+              }}
+            >
+              Previous
+            </Button>
+
+            {getVisiblePages(
+              paginationState.currentPage,
+              paginationState.totalPages,
+            ).map((pageItem, index) =>
+              pageItem === "ellipsis" ? (
+                <Box
+                  key={`ellipsis-${index}`}
+                  sx={{
+                    ...paginationButtonSx(false),
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "default",
+                  }}
+                >
+                  ...
+                </Box>
+              ) : (
+                <Button
+                  key={pageItem}
+                  size="small"
+                  onClick={() => handleChangePage(null, pageItem)}
+                  sx={paginationButtonSx(
+                    pageItem === paginationState.currentPage,
+                  )}
+                >
+                  {pageItem + 1}
+                </Button>
+              ),
+            )}
+
+            <Button
+              size="small"
+              onClick={() =>
+                handleChangePage(null, paginationState.currentPage + 1)
+              }
+              disabled={
+                paginationState.currentPage >= paginationState.totalPages - 1
+              }
+              sx={{
+                ...paginationButtonSx(
+                  false,
+                  paginationState.currentPage >= paginationState.totalPages - 1,
+                ),
+                borderTopRightRadius: 4,
+                borderBottomRightRadius: 4,
+              }}
+            >
+              Next
+            </Button>
+          </Box>
+        </Box>
+      )}
 
       {enableInfiniteScroll && (
         <Box ref={sentinelRef} sx={{ py: 2, textAlign: "center" }}>
