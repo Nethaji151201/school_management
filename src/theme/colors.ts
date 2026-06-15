@@ -5,8 +5,8 @@
 
 export const COLORS = {
   // Primary Brand Colors
-  primary: "#2563EB",
-  secondary: "#7C3AED",
+  primary: "#0b9ca8",
+  secondary: "#00acc1",
   success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
@@ -52,8 +52,8 @@ export const COLORS = {
 
   // Gradients
   gradient: {
-    primary: "linear-gradient(135deg, #2563EB 0%, #7C3AED 100%)",
-    secondary: "linear-gradient(135deg, #7C3AED 0%, #0EA5E9 100%)",
+    primary: "linear-gradient(135deg, #0b9ca8 0%, #00acc1 100%)",
+    secondary: "linear-gradient(135deg, #00acc1 0%, #0ea5e9 100%)",
     success: "linear-gradient(135deg, #22C55E 0%, #10B981 100%)",
     warning: "linear-gradient(135deg, #F59E0B 0%, #F97316 100%)",
   },

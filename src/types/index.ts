@@ -101,3 +101,11 @@ export interface ErrorResponse {
   status: number;
   errors?: Record<string, string[]>;
 }
+
+export interface schoolDetails {
+  schoolName: string;
+  schoolAddress: string;
+  schoolPhone: string;
+  schoolEmail: string;
+  schoolLogo?: string;
+}

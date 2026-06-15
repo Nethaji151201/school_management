@@ -3,23 +3,21 @@ import {
   Box,
   List,
   TextField,
-  Divider,
   Typography,
-  Avatar,
-  Menu,
-  MenuItem,
-  IconButton,
-  Tooltip,
   InputAdornment,
+  Tooltip,
+  Divider,
 } from "@mui/material";
 import * as MuiIcons from "@mui/icons-material";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useThemeStore } from "../../store/themeStore";
 import { useSidebarStore, useMenuStore } from "../../store/menuStore";
-import { COLORS } from "../../theme/colors";
 import { SIDEBAR_MENUS } from "../../constants/menuConfig";
+import { SchoolConfig } from "../../constants/schoolConfig";
 import SidebarItem from "./SidebarItem";
 import { useNavigate } from "react-router-dom";
+
+import { COLORS } from "../../theme/colors";
 
 interface SidebarProps {
   width?: number;
@@ -27,30 +25,20 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
-  width = 280,
-  collapsedWidth = 80,
+  width = 260,
+  collapsedWidth = 72,
 }) => {
   const { mode } = useThemeStore();
   const { isCollapsed, setCollapsed } = useSidebarStore();
-  const { favoriteMenus, recentMenus } = useMenuStore();
+  useMenuStore();
   const navigate = useNavigate();
   const isDark = mode === "dark";
-  const colors = isDark ? COLORS.dark : COLORS.light;
   const [searchQuery, setSearchQuery] = useState("");
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const sidebarBg = isDark ? "#0c2536" : COLORS.primary;
 
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  // Filter menus based on search query
   const filterMenus = (items: any[]): any[] => {
     if (!searchQuery) return items;
-
     return items
       .map((item) => ({
         ...item,
@@ -76,100 +64,144 @@ const Sidebar: React.FC<SidebarProps> = ({
     navigate(path);
   };
 
-  const sidebarVariants = {
-    expanded: { width },
-    collapsed: { width: collapsedWidth },
-  };
-
   return (
-    <>
-      {/* Desktop Sidebar */}
-      <motion.div
-        animate={isCollapsed ? "collapsed" : "expanded"}
-        variants={sidebarVariants}
-        transition={{ duration: 0.3 }}
-        style={{
-          height: "100vh",
-          position: "fixed",
-          left: 0,
-          top: 0,
-          zIndex: 1200,
+    <motion.div
+      animate={{ width: isCollapsed ? collapsedWidth : width }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      style={{
+        height: "100vh",
+        position: "fixed",
+        left: 0,
+        top: 0,
+        zIndex: 1200,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        backgroundColor: sidebarBg,
+      }}
+    >
+      {/* Logo / Brand Header */}
+      <Box
+        sx={{
           display: "flex",
-          flexDirection: "column",
+          alignItems: "center",
+          px: 1.5,
+          py: 2,
+          minHeight: 64,
+          gap: 1.5,
+          overflow: "hidden",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
         }}
       >
-        <Box
-          sx={{
-            backgroundImage: isDark
-              ? `linear-gradient(135deg, ${COLORS.glass.dark} 0%, ${COLORS.glass.dark} 100%)`
-              : `linear-gradient(135deg, ${COLORS.glass.light} 0%, ${COLORS.glass.light} 100%)`,
-            backdropFilter: "blur(10px)",
-            border: `1px solid ${isDark ? COLORS.glass.darkBorder : COLORS.glass.lightBorder}`,
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          {/* Header */}
+        {/* School Logo Icon */}
+        <Tooltip title={isCollapsed ? "Nethaji Academy" : ""} placement="right">
           <Box
+            onClick={() => isCollapsed && setCollapsed(false)}
             sx={{
-              p: 2,
+              width: 38,
+              height: 38,
+              borderRadius: "10px",
+              backgroundColor: "rgba(255,255,255,0.2)",
+              border: "2px solid rgba(255,255,255,0.4)",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
-              borderBottom: `1px solid ${colors.border}`,
+              justifyContent: "center",
+              flexShrink: 0,
+              cursor: isCollapsed ? "pointer" : "default",
+              transition: "all 0.2s",
+              "&:hover": isCollapsed
+                ? { backgroundColor: "rgba(255,255,255,0.3)" }
+                : {},
             }}
           >
-            {!isCollapsed && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 700,
-                    backgroundImage: COLORS.gradient.primary,
-                    backgroundClip: "text",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    fontSize: "1rem",
-                  }}
-                >
-                  SMS
-                </Typography>
-              </motion.div>
-            )}
-            <Tooltip title={isCollapsed ? "Expand" : "Collapse"}>
-              <IconButton
-                size="small"
-                onClick={() => setCollapsed(!isCollapsed)}
-                sx={{
-                  color: colors.textSecondary,
-                  "&:hover": {
-                    backgroundColor: isDark ? "#334155" : "#F1F5F9",
-                  },
-                }}
-              >
-                {isCollapsed ? (
-                  <MuiIcons.ChevronRight />
-                ) : (
-                  <MuiIcons.ChevronLeft />
-                )}
-              </IconButton>
-            </Tooltip>
+            <MuiIcons.School sx={{ color: "#fff", fontSize: 22 }} />
           </Box>
+        </Tooltip>
 
-          {/* Search */}
+        <AnimatePresence>
           {!isCollapsed && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              style={{ padding: "0.5rem 1rem" }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+              style={{ overflow: "hidden", flex: 1 }}
             >
+              <Typography
+                sx={{
+                  fontWeight: 800,
+                  fontSize: "1rem",
+                  color: "#fff",
+                  letterSpacing: "-0.01em",
+                  lineHeight: 1.1,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {SchoolConfig.schoolName}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.65rem",
+                  color: "rgba(255,255,255,0.65)",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {SchoolConfig.schoolAddress}
+              </Typography>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Tooltip title="Collapse sidebar">
+                <Box
+                  onClick={() => setCollapsed(true)}
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "rgba(255,255,255,0.7)",
+                    "&:hover": {
+                      backgroundColor: "rgba(255,255,255,0.12)",
+                      color: "#fff",
+                    },
+                    transition: "all 0.2s",
+                    flexShrink: 0,
+                  }}
+                >
+                  <MuiIcons.ChevronLeft sx={{ fontSize: 20 }} />
+                </Box>
+              </Tooltip>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Box>
+
+      {/* Search */}
+      <AnimatePresence>
+        {!isCollapsed && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25 }}
+            style={{ overflow: "hidden" }}
+          >
+            <Box sx={{ px: 2, py: 1.5 }}>
               <TextField
                 fullWidth
                 size="small"
@@ -181,10 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     startAdornment: (
                       <InputAdornment position="start">
                         <MuiIcons.Search
-                          sx={{
-                            fontSize: 18,
-                            color: colors.textTertiary,
-                          }}
+                          sx={{ fontSize: 16, color: "rgba(255,255,255,0.5)" }}
                         />
                       </InputAdornment>
                     ),
@@ -192,259 +221,184 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
-                    fontSize: "0.875rem",
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "rgba(0,0,0,0.02)",
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: 1,
-                    transition: "all 0.2s",
-                    "&:hover": {
-                      backgroundColor: isDark
-                        ? "rgba(255,255,255,0.08)"
-                        : "rgba(0,0,0,0.04)",
-                      borderColor: COLORS.primary,
+                    backgroundColor: "rgba(255,255,255,0.12)",
+                    borderRadius: "10px",
+                    fontSize: "0.8rem",
+                    color: "#fff",
+                    "& fieldset": { borderColor: "rgba(255,255,255,0.15)" },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255,255,255,0.35)",
                     },
-                    "&.Mui-focused": {
-                      backgroundColor: isDark
-                        ? "rgba(255,255,255,0.1)"
-                        : "rgba(0,0,0,0.05)",
-                      borderColor: COLORS.primary,
+                    "&.Mui-focused fieldset": {
+                      borderColor: "rgba(255,255,255,0.5)",
                     },
                   },
                   "& .MuiOutlinedInput-input::placeholder": {
-                    color: colors.textTertiary,
-                    opacity: 0.7,
+                    color: "rgba(255,255,255,0.4)",
+                    opacity: 1,
                   },
                 }}
               />
-            </motion.div>
-          )}
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-          {/* Main Content */}
-          <Box
-            sx={{
-              flex: 1,
-              overflowY: "auto",
-              py: 1,
-              px: isCollapsed ? 0.5 : 1,
-              "&::-webkit-scrollbar": {
-                width: 6,
-              },
-              "&::-webkit-scrollbar-track": {
-                background: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                background: isDark ? "#475569" : "#CBD5E1",
-                borderRadius: 3,
-                "&:hover": {
-                  background: isDark ? "#64748B" : "#94A3B8",
-                },
-              },
-            }}
-          >
-            {/* Favorites Section */}
-            {!isCollapsed && favoriteMenus.size > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    px: 1.5,
-                    py: 1,
-                    color: colors.textTertiary,
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    fontSize: "0.7rem",
-                    display: "block",
-                  }}
-                >
-                  Favorites
-                </Typography>
-                <List sx={{ py: 0 }}>
-                  {SIDEBAR_MENUS.map((item) =>
-                    favoriteMenus.has(item.id || "") ? (
-                      <SidebarItem
-                        key={item.id}
-                        item={item}
-                        onNavigate={handleNavigate}
-                      />
-                    ) : null,
-                  )}
-                </List>
-                <Divider
-                  sx={{
-                    my: 1,
-                    borderColor: colors.border,
-                  }}
-                />
-              </motion.div>
-            )}
+      {/* Dashboard Quick Link */}
+      <Box sx={{ px: isCollapsed ? 1 : 1.5, pt: 0.5, pb: 0 }}>
+        <SidebarItem
+          item={{
+            id: "dashboard",
+            title: "Dashboard",
+            icon: "Dashboard",
+            path: "/",
+          }}
+          onNavigate={handleNavigate}
+          isCollapsed={isCollapsed}
+        />
+      </Box>
 
-            {/* Recent Menus */}
-            {!isCollapsed && recentMenus.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-              >
-                <Typography
-                  variant="caption"
-                  sx={{
-                    px: 1.5,
-                    py: 1,
-                    color: colors.textTertiary,
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    fontSize: "0.7rem",
-                    display: "block",
-                  }}
-                >
-                  Recent
-                </Typography>
-                <List sx={{ py: 0 }}>
-                  {recentMenus.slice(0, 3).map((menuId) => {
-                    const item = SIDEBAR_MENUS.find((m) => m.id === menuId);
-                    return item ? (
-                      <SidebarItem
-                        key={item.id}
-                        item={item}
-                        onNavigate={handleNavigate}
-                      />
-                    ) : null;
-                  })}
-                </List>
-                <Divider
-                  sx={{
-                    my: 1,
-                    borderColor: colors.border,
-                  }}
-                />
-              </motion.div>
-            )}
+      {/* Section label */}
+      {!isCollapsed && (
+        <Typography
+          sx={{
+            px: 2.5,
+            pt: 2,
+            pb: 0.5,
+            fontSize: "0.65rem",
+            fontWeight: 700,
+            color: "rgba(255,255,255,0.45)",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+          }}
+        >
+          Apps
+        </Typography>
+      )}
 
-            {/* Main Menu */}
-            <Typography
-              variant="caption"
-              sx={{
-                px: 1.5,
-                py: 1,
-                color: colors.textTertiary,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                fontSize: "0.7rem",
-                display: !isCollapsed ? "block" : "none",
-              }}
-            >
-              Menu
-            </Typography>
-            <List sx={{ py: 0 }}>
-              {filteredMenus.map((item) => (
-                <SidebarItem
-                  key={item.id}
-                  item={item}
-                  onNavigate={handleNavigate}
-                />
-              ))}
-            </List>
-          </Box>
-
-          {/* Footer */}
-          {!isCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Box
-                sx={{
-                  p: 2,
-                  borderTop: `1px solid ${colors.border}`,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  cursor: "pointer",
-                  "&:hover": {
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.05)"
-                      : "rgba(0,0,0,0.02)",
-                  },
-                }}
-                onClick={handleMenuOpen}
-              >
-                <Avatar
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    backgroundImage: COLORS.gradient.primary,
-                    fontSize: "0.875rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  AD
-                </Avatar>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      fontWeight: 600,
-                      color: colors.text,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    Admin
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: colors.textTertiary,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    Admin
-                  </Typography>
-                </Box>
-                <MuiIcons.MoreVertOutlined
-                  sx={{
-                    fontSize: 18,
-                    color: colors.textTertiary,
-                  }}
-                />
-              </Box>
-            </motion.div>
-          )}
-        </Box>
-      </motion.div>
-
-      {/* User Menu */}
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        slotProps={{
-          paper: {
-            sx: {
-              backgroundImage: isDark
-                ? `linear-gradient(135deg, ${COLORS.glass.dark} 0%, ${COLORS.glass.dark} 100%)`
-                : `linear-gradient(135deg, ${COLORS.glass.light} 0%, ${COLORS.glass.light} 100%)`,
-              backdropFilter: "blur(10px)",
-              border: `1px solid ${
-                isDark ? COLORS.glass.darkBorder : COLORS.glass.lightBorder
-              }`,
-            },
+      {/* Scrollable Menu */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          px: isCollapsed ? 1 : 1.5,
+          pb: 2,
+          "&::-webkit-scrollbar": { width: 4 },
+          "&::-webkit-scrollbar-track": { background: "transparent" },
+          "&::-webkit-scrollbar-thumb": {
+            background: "rgba(255,255,255,0.2)",
+            borderRadius: 4,
           },
         }}
       >
-        <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Logout</MenuItem>
-      </Menu>
-    </>
+        <List sx={{ py: 0 }}>
+          {filteredMenus.map((item) => (
+            <SidebarItem
+              key={item.id}
+              item={item}
+              onNavigate={handleNavigate}
+              isCollapsed={isCollapsed}
+            />
+          ))}
+        </List>
+      </Box>
+
+      {/* Footer User Card */}
+      <AnimatePresence>
+        {!isCollapsed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
+            <Box
+              sx={{
+                p: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 1.5,
+                cursor: "pointer",
+                "&:hover": { backgroundColor: "rgba(255,255,255,0.07)" },
+                transition: "background 0.2s",
+              }}
+            >
+              <Box
+                sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.2)",
+                  border: "2px solid rgba(255,255,255,0.4)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  flexShrink: 0,
+                }}
+              >
+                AD
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: "0.85rem",
+                    color: "#fff",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  Admin User
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "0.7rem",
+                    color: "rgba(255,255,255,0.55)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Administrator
+                </Typography>
+              </Box>
+              <MuiIcons.MoreVert
+                sx={{ color: "rgba(255,255,255,0.5)", fontSize: 18 }}
+              />
+            </Box>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Collapsed expand hint */}
+      {isCollapsed && (
+        <Tooltip title="Expand sidebar" placement="right">
+          <Box
+            onClick={() => setCollapsed(false)}
+            sx={{
+              mx: "auto",
+              mb: 2,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              backgroundColor: "rgba(255,255,255,0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              color: "#fff",
+              "&:hover": { backgroundColor: "rgba(255,255,255,0.25)" },
+              transition: "all 0.2s",
+            }}
+          >
+            <MuiIcons.ChevronRight sx={{ fontSize: 20 }} />
+          </Box>
+        </Tooltip>
+      )}
+    </motion.div>
   );
 };
 

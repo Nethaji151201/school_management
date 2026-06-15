@@ -40,6 +40,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           transition: "margin-left 0.3s ease-in-out",
           display: "flex",
           flexDirection: "column",
+          minWidth: 0,
+          overflow: "hidden",
         }}
       >
         {/* Header */}

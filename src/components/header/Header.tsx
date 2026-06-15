@@ -22,19 +22,19 @@ const Header: React.FC = () => {
   const { mode, toggleTheme } = useThemeStore();
   const { isCollapsed } = useSidebarStore();
   const isDark = mode === "dark";
-  const colors = isDark ? COLORS.dark : COLORS.light;
 
   const [notificationAnchor, setNotificationAnchor] =
     useState<null | HTMLElement>(null);
   const [academicYearAnchor, setAcademicYearAnchor] =
     useState<null | HTMLElement>(null);
   const [avatarAnchor, setAvatarAnchor] = useState<null | HTMLElement>(null);
+  const [searchValue, setSearchValue] = useState("");
 
   const notifications = [
     {
       id: 1,
       title: "Fees Payment Received",
-      message: "Student John Doe paid $5000",
+      message: "Student John Doe paid ₹5000",
       timestamp: "2 mins ago",
       read: false,
     },
@@ -60,25 +60,24 @@ const Header: React.FC = () => {
     { id: 3, year: "2022-2023", isActive: false },
   ];
 
-  const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
-    setNotificationAnchor(event.currentTarget);
-  };
-
-  const handleAcademicYearClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAcademicYearAnchor(event.currentTarget);
-  };
-
-  const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAvatarAnchor(event.currentTarget);
-  };
-
   const handleClose = () => {
     setNotificationAnchor(null);
     setAcademicYearAnchor(null);
     setAvatarAnchor(null);
   };
 
-  const marginLeft = isCollapsed ? 80 : 280;
+  const marginLeft = isCollapsed ? 64 : 248;
+
+  const headerBg = isDark
+    ? "rgba(15, 23, 42, 0.82)"
+    : "rgba(255, 255, 255, 0.92)";
+  const borderColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(15,23,42,0.1)";
+  const headerShadow = isDark
+    ? "0 26px 70px rgba(0,0,0,0.24)"
+    : "0 20px 52px rgba(15,23,42,0.08)";
+  const textColor = isDark ? "#e2e8f0" : "#22354d";
+  const subTextColor = isDark ? "#cbd5e1" : "#6b7280";
+  const inputBg = isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.98)";
 
   return (
     <motion.div
@@ -88,242 +87,375 @@ const Header: React.FC = () => {
     >
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           ml: `${marginLeft}px`,
           width: `calc(100% - ${marginLeft}px)`,
           transition: "margin-left 0.3s ease-in-out, width 0.3s ease-in-out",
+          backgroundColor: headerBg,
           backgroundImage: isDark
-            ? `linear-gradient(135deg, ${COLORS.glass.dark} 0%, ${COLORS.glass.dark} 100%)`
-            : `linear-gradient(135deg, ${COLORS.glass.light} 0%, ${COLORS.glass.light} 100%)`,
-          backdropFilter: "blur(10px)",
-          border: `1px solid ${isDark ? COLORS.glass.darkBorder : COLORS.glass.lightBorder}`,
-          boxShadow: isDark
-            ? "0 4px 12px rgba(0, 0, 0, 0.3)"
-            : "0 4px 12px rgba(0, 0, 0, 0.08)",
-          color: colors.text,
+            ? "linear-gradient(180deg, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.82) 100%)"
+            : "linear-gradient(180deg, rgba(255,255,255,0.99) 0%, rgba(248,250,252,0.92) 100%)",
+          borderBottom: `1px solid ${borderColor}`,
+          boxShadow: headerShadow,
+          color: textColor,
+          backdropFilter: "blur(22px)",
+          WebkitBackdropFilter: "blur(22px)",
+          borderRadius: "16px 16px 16px 16px",
         }}
-        elevation={0}
       >
-        <Toolbar sx={{ px: 3 }}>
-          <Box sx={{ flex: 1 }}>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "1rem",
+        <Toolbar sx={{ minHeight: "64px !important" }}>
+          {/* Left: Search Bar */}
+          <Box sx={{ flex: 1, maxWidth: 440 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: inputBg,
+                borderRadius: "22px",
+                px: 2.5,
+                py: 1,
+                gap: 1,
+                border: `1px solid ${borderColor}`,
+                transition: "all 0.25s ease",
+                boxShadow: isDark
+                  ? "inset 0 3px 18px rgba(255,255,255,0.06)"
+                  : "inset 0 3px 18px rgba(15,23,42,0.06)",
+                backdropFilter: "blur(18px)",
+                WebkitBackdropFilter: "blur(18px)",
+                "&:focus-within": {
+                  borderColor: COLORS.primary,
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.18)"
+                    : "rgba(255,255,255,1)",
+                  boxShadow: `0 0 0 3px ${COLORS.primary}18`,
+                },
+              }}
+            >
+              <input
+                type="text"
+                placeholder="Type here to search..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                style={{
+                  border: "none",
+                  outline: "none",
+                  backgroundColor: "transparent",
+                  color: textColor,
+                  fontSize: "0.875rem",
+                  flex: 1,
+                  fontFamily: "inherit",
                 }}
-              >
-                Dashboard
-              </Typography>
-            </Stack>
+              />
+              <MuiIcons.Search
+                sx={{
+                  fontSize: 18,
+                  color: COLORS.primary,
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.12)"
+                    : "rgba(37,99,235,0.12)",
+                  borderRadius: "50%",
+                  p: 0.7,
+                  flexShrink: 0,
+                }}
+              />
+            </Box>
           </Box>
 
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          {/* Right: Actions + Profile */}
+          <Stack
+            direction="row"
+            spacing={0.5}
+            sx={{ alignItems: "center", ml: "auto" }}
+          >
+            {/* Academic Year */}
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Chip
                 label="2024-2025"
-                onClick={handleAcademicYearClick}
+                onClick={(e) => setAcademicYearAnchor(e.currentTarget)}
+                icon={
+                  <MuiIcons.CalendarMonth
+                    sx={{ fontSize: "16px !important" }}
+                  />
+                }
+                size="small"
                 sx={{
-                  background: `linear-gradient(135deg, ${COLORS.primary}20, ${COLORS.secondary}20)`,
-                  border: `1px solid ${COLORS.primary}40`,
-                  fontWeight: 500,
+                  backgroundColor: `${COLORS.primary}14`,
+                  color: COLORS.primary,
+                  border: `1px solid ${COLORS.primary}30`,
+                  fontWeight: 600,
+                  fontSize: "0.78rem",
                   cursor: "pointer",
-                  "&:hover": {
-                    background: `linear-gradient(135deg, ${COLORS.primary}30, ${COLORS.secondary}30)`,
-                  },
+                  px: 0.5,
+                  "&:hover": { backgroundColor: `${COLORS.primary}22` },
                 }}
-                icon={<MuiIcons.CalendarMonth />}
               />
             </motion.div>
 
             <Divider
               orientation="vertical"
               flexItem
-              sx={{
-                borderColor: colors.border,
-              }}
+              sx={{ mx: 0.5, height: 24, alignSelf: "center", borderColor }}
             />
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* Theme Toggle */}
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <IconButton
-                onClick={handleNotificationClick}
+                onClick={toggleTheme}
+                size="small"
                 sx={{
-                  color: colors.text,
+                  color: subTextColor,
                   "&:hover": {
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,0,0,0.05)",
+                    backgroundColor: inputBg,
+                    color: COLORS.primary,
                   },
                 }}
               >
-                <Badge badgeContent={2} color="error">
-                  <MuiIcons.NotificationsOutlined />
+                {isDark ? (
+                  <MuiIcons.LightMode sx={{ fontSize: 20 }} />
+                ) : (
+                  <MuiIcons.DarkMode sx={{ fontSize: 20 }} />
+                )}
+              </IconButton>
+            </motion.div>
+
+            {/* Notifications */}
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <IconButton
+                onClick={(e) => setNotificationAnchor(e.currentTarget)}
+                size="small"
+                sx={{
+                  color: subTextColor,
+                  "&:hover": {
+                    backgroundColor: inputBg,
+                    color: COLORS.primary,
+                  },
+                }}
+              >
+                <Badge
+                  badgeContent={2}
+                  sx={{
+                    "& .MuiBadge-badge": {
+                      backgroundColor: "#ef4444",
+                      color: "#fff",
+                      fontSize: "0.6rem",
+                      minWidth: 16,
+                      height: 16,
+                    },
+                  }}
+                >
+                  <MuiIcons.NotificationsOutlined sx={{ fontSize: 20 }} />
                 </Badge>
               </IconButton>
             </motion.div>
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            {/* Email */}
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
               <IconButton
-                onClick={toggleTheme}
+                size="small"
                 sx={{
-                  color: colors.text,
+                  color: subTextColor,
                   "&:hover": {
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,0,0,0.05)",
+                    backgroundColor: inputBg,
+                    color: COLORS.primary,
                   },
                 }}
               >
-                {isDark ? <MuiIcons.LightMode /> : <MuiIcons.DarkMode />}
+                <MuiIcons.MailOutlined sx={{ fontSize: 20 }} />
               </IconButton>
             </motion.div>
 
-            <Box
-              sx={{
-                display: { xs: "none", sm: "flex" },
-                alignItems: "center",
-                backgroundColor: isDark
-                  ? "rgba(255,255,255,0.05)"
-                  : "rgba(0,0,0,0.02)",
-                border: `1px solid ${colors.border}`,
-                borderRadius: 1,
-                px: 1.5,
-                py: 0.75,
-              }}
-            >
-              <MuiIcons.Search
-                sx={{ fontSize: 18, color: colors.textTertiary, mr: 1 }}
-              />
-              <input
-                type="text"
-                placeholder="Search..."
-                style={{
-                  border: "none",
-                  outline: "none",
-                  backgroundColor: "transparent",
-                  color: colors.text,
-                  fontSize: "0.875rem",
-                  width: 150,
-                }}
-              />
-            </Box>
+            <Divider
+              orientation="vertical"
+              flexItem
+              sx={{ mx: 0.5, height: 24, alignSelf: "center", borderColor }}
+            />
 
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <IconButton onClick={handleAvatarClick} sx={{ p: 0, ml: 1 }}>
+            {/* User Profile */}
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Box
+                onClick={(e) => setAvatarAnchor(e.currentTarget)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  cursor: "pointer",
+                  pl: 0.5,
+                  pr: 1,
+                  py: 0.5,
+                  borderRadius: "12px",
+                  "&:hover": { backgroundColor: inputBg },
+                  transition: "all 0.2s",
+                }}
+              >
+                {/* Avatar */}
                 <Box
                   sx={{
                     width: 36,
                     height: 36,
                     borderRadius: "50%",
-                    backgroundImage: COLORS.gradient.primary,
+                    background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)`,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#FFFFFF",
+                    color: "#fff",
                     fontWeight: 700,
-                    fontSize: "0.875rem",
+                    fontSize: "0.8rem",
+                    flexShrink: 0,
+                    boxShadow: `0 2px 8px ${COLORS.primary}40`,
                   }}
                 >
                   AD
                 </Box>
-              </IconButton>
+
+                {/* Name + Status */}
+                <Box sx={{ display: { xs: "none", sm: "block" } }}>
+                  <Typography
+                    sx={{
+                      fontSize: "0.85rem",
+                      fontWeight: 700,
+                      color: textColor,
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    Admin User
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.4,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 7,
+                        height: 7,
+                        borderRadius: "50%",
+                        backgroundColor: "#22c55e",
+                      }}
+                    />
+                    <Typography
+                      sx={{
+                        fontSize: "0.68rem",
+                        color: "#22c55e",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Available
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <MuiIcons.ExpandMore
+                  sx={{
+                    fontSize: 18,
+                    color: subTextColor,
+                    display: { xs: "none", sm: "flex" },
+                  }}
+                />
+              </Box>
             </motion.div>
           </Stack>
         </Toolbar>
       </AppBar>
 
+      {/* Notifications Menu */}
       <Menu
         anchorEl={notificationAnchor}
         open={Boolean(notificationAnchor)}
         onClose={handleClose}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         slotProps={{
           paper: {
             sx: {
-              backgroundImage: isDark
-                ? `linear-gradient(135deg, ${COLORS.glass.dark} 0%, ${COLORS.glass.dark} 100%)`
-                : `linear-gradient(135deg, ${COLORS.glass.light} 0%, ${COLORS.glass.light} 100%)`,
-              backdropFilter: "blur(10px)",
-              border: `1px solid ${isDark ? COLORS.glass.darkBorder : COLORS.glass.lightBorder}`,
-              minWidth: 350,
+              mt: 1,
+              minWidth: 340,
+              backgroundColor: headerBg,
+              border: `1px solid ${borderColor}`,
+              borderRadius: "16px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
             },
           },
         }}
       >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+        <Box sx={{ px: 2, pt: 2, pb: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 700, fontSize: "1rem", color: textColor }}
+          >
             Notifications
           </Typography>
         </Box>
-        <Divider />
-        {notifications.map((notification) => (
+        <Divider sx={{ borderColor }} />
+        {notifications.map((n) => (
           <MenuItem
-            key={notification.id}
+            key={n.id}
             onClick={handleClose}
             sx={{
               py: 1.5,
               px: 2,
-              flexDirection: "column",
               alignItems: "flex-start",
-              borderBottom: `1px solid ${colors.border}`,
+              gap: 1,
+              borderBottom: `1px solid ${borderColor}`,
             }}
           >
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ width: "100%", alignItems: "flex-start" }}
-            >
-              <Box
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: notification.read
-                    ? "transparent"
-                    : COLORS.primary,
-                  mt: 1,
-                }}
-              />
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {notification.title}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{ color: colors.textSecondary }}
-                >
-                  {notification.message}
-                </Typography>
-              </Box>
-            </Stack>
+            <Box
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                backgroundColor: n.read ? "transparent" : COLORS.primary,
+                mt: 0.8,
+                flexShrink: 0,
+              }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                sx={{ fontSize: "0.85rem", fontWeight: 600, color: textColor }}
+              >
+                {n.title}
+              </Typography>
+              <Typography sx={{ fontSize: "0.75rem", color: subTextColor }}>
+                {n.message}
+              </Typography>
+              <Typography
+                sx={{ fontSize: "0.7rem", color: subTextColor, mt: 0.3 }}
+              >
+                {n.timestamp}
+              </Typography>
+            </Box>
           </MenuItem>
         ))}
-        <Divider />
         <MenuItem
           onClick={handleClose}
-          sx={{ justifyContent: "center", py: 1 }}
+          sx={{ justifyContent: "center", py: 1.5 }}
         >
           <Typography
-            variant="body2"
-            sx={{ color: COLORS.primary, fontWeight: 600 }}
+            sx={{ fontSize: "0.85rem", color: COLORS.primary, fontWeight: 600 }}
           >
-            View All
+            View All Notifications
           </Typography>
         </MenuItem>
       </Menu>
 
+      {/* Academic Year Menu */}
       <Menu
         anchorEl={academicYearAnchor}
         open={Boolean(academicYearAnchor)}
         onClose={handleClose}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         slotProps={{
           paper: {
             sx: {
-              backgroundImage: isDark
-                ? `linear-gradient(135deg, ${COLORS.glass.dark} 0%, ${COLORS.glass.dark} 100%)`
-                : `linear-gradient(135deg, ${COLORS.glass.light} 0%, ${COLORS.glass.light} 100%)`,
-              backdropFilter: "blur(10px)",
-              border: `1px solid ${isDark ? COLORS.glass.darkBorder : COLORS.glass.lightBorder}`,
+              mt: 1,
+              minWidth: 180,
+              backgroundColor: headerBg,
+              border: `1px solid ${borderColor}`,
+              borderRadius: "14px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
             },
           },
         }}
@@ -332,46 +464,73 @@ const Header: React.FC = () => {
           <MenuItem
             key={year.id}
             onClick={handleClose}
-            selected={year.isActive}
             sx={{
-              backgroundColor: year.isActive
-                ? `${COLORS.primary}20`
-                : "transparent",
+              py: 1,
+              px: 2,
               borderLeft: year.isActive
                 ? `3px solid ${COLORS.primary}`
                 : "3px solid transparent",
+              backgroundColor: year.isActive
+                ? `${COLORS.primary}0f`
+                : "transparent",
             }}
           >
             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
               {year.isActive && (
-                <MuiIcons.Check sx={{ fontSize: 16, color: COLORS.primary }} />
+                <MuiIcons.Check sx={{ fontSize: 15, color: COLORS.primary }} />
               )}
-              <Typography variant="body2">{year.year}</Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.875rem",
+                  color: year.isActive ? COLORS.primary : textColor,
+                }}
+              >
+                {year.year}
+              </Typography>
             </Stack>
           </MenuItem>
         ))}
       </Menu>
 
+      {/* Avatar Menu */}
       <Menu
         anchorEl={avatarAnchor}
         open={Boolean(avatarAnchor)}
         onClose={handleClose}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         slotProps={{
           paper: {
             sx: {
-              backgroundImage: isDark
-                ? `linear-gradient(135deg, ${COLORS.glass.dark} 0%, ${COLORS.glass.dark} 100%)`
-                : `linear-gradient(135deg, ${COLORS.glass.light} 0%, ${COLORS.glass.light} 100%)`,
-              backdropFilter: "blur(10px)",
-              border: `1px solid ${isDark ? COLORS.glass.darkBorder : COLORS.glass.lightBorder}`,
+              mt: 1,
+              minWidth: 180,
+              backgroundColor: headerBg,
+              border: `1px solid ${borderColor}`,
+              borderRadius: "14px",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
             },
           },
         }}
       >
-        <MenuItem onClick={handleClose}>Profile</MenuItem>
-        <MenuItem onClick={handleClose}>Settings</MenuItem>
-        <Divider />
-        <MenuItem onClick={handleClose}>Logout</MenuItem>
+        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
+          <MuiIcons.Person sx={{ fontSize: 18, color: subTextColor }} />
+          <Typography sx={{ fontSize: "0.875rem", color: textColor }}>
+            Profile
+          </Typography>
+        </MenuItem>
+        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
+          <MuiIcons.Settings sx={{ fontSize: 18, color: subTextColor }} />
+          <Typography sx={{ fontSize: "0.875rem", color: textColor }}>
+            Settings
+          </Typography>
+        </MenuItem>
+        <Divider sx={{ borderColor }} />
+        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
+          <MuiIcons.Logout sx={{ fontSize: 18, color: "#ef4444" }} />
+          <Typography sx={{ fontSize: "0.875rem", color: "#ef4444" }}>
+            Logout
+          </Typography>
+        </MenuItem>
       </Menu>
     </motion.div>
   );

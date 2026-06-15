@@ -100,9 +100,9 @@ const Login: React.FC = () => {
       ))}
 
       <Container maxWidth="lg">
-        <Grid container spacing={4} alignItems="center">
+        <Grid container spacing={4} sx={{ alignItems: "center" }}>
           {/* Left Side - Illustration */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -157,7 +157,7 @@ const Login: React.FC = () => {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 * (index + 1) }}
                     >
-                      <Stack direction="row" spacing={2} alignItems="center">
+                      <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
                         <Box
                           sx={{
                             width: 36,
@@ -185,7 +185,7 @@ const Login: React.FC = () => {
           </Grid>
 
           {/* Right Side - Login Form */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -207,9 +207,11 @@ const Login: React.FC = () => {
                 {/* Header */}
                 <Stack
                   direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  mb={4}
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 4,
+                  }}
                 >
                   <Box>
                     <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
@@ -329,8 +331,10 @@ const Login: React.FC = () => {
                     {/* Remember Me & Forgot */}
                     <Stack
                       direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
+                      sx={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
                     >
                       <FormControlLabel
                         control={
@@ -385,8 +389,7 @@ const Login: React.FC = () => {
                     <Stack
                       direction="row"
                       spacing={2}
-                      alignItems="center"
-                      sx={{ my: 2 }}
+                      sx={{ alignItems: "center", my: 2 }}
                     >
                       <Divider sx={{ flex: 1 }} />
                       <Typography

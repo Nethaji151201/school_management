@@ -7,8 +7,6 @@ import {
   Stack,
   LinearProgress,
   Button,
-  Tab,
-  Tabs,
   Table,
   TableBody,
   TableCell,
@@ -22,8 +20,6 @@ import { motion } from "framer-motion";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -88,9 +84,11 @@ const KPICard: React.FC<KPICardProps> = ({
       >
         <Stack
           direction="row"
-          justifyContent="space-between"
-          alignItems="flex-start"
-          mb={2}
+          sx={{
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            mb: 2,
+          }}
         >
           <Box
             sx={{
@@ -168,7 +166,6 @@ const Dashboard: React.FC = () => {
   const { mode } = useThemeStore();
   const isDark = mode === "dark";
   const colors = isDark ? COLORS.dark : COLORS.light;
-  const [tabValue, setTabValue] = React.useState(0);
 
   const kpiCards = [
     {
@@ -249,7 +246,7 @@ const Dashboard: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <Box mb={4}>
+        <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
             Welcome Back, Admin!
           </Typography>
@@ -260,18 +257,18 @@ const Dashboard: React.FC = () => {
       </motion.div>
 
       {/* KPI Cards */}
-      <Grid container spacing={3} mb={4}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         {kpiCards.map((card, index) => (
-          <Grid item xs={12} sm={6} lg={3} key={index}>
+          <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={index}>
             <KPICard {...card} index={index} />
           </Grid>
         ))}
       </Grid>
 
       {/* Charts Section */}
-      <Grid container spacing={3} mb={4}>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Attendance Chart */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -322,7 +319,7 @@ const Dashboard: React.FC = () => {
         </Grid>
 
         {/* Fees Collection Chart */}
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -391,8 +388,7 @@ const Dashboard: React.FC = () => {
           <Box sx={{ p: 3, borderBottom: `1px solid ${colors.border}` }}>
             <Stack
               direction="row"
-              justifyContent="space-between"
-              alignItems="center"
+              sx={{ justifyContent: "space-between", alignItems: "center" }}
             >
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
                 Recent Admissions
