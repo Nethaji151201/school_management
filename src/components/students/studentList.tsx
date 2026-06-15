@@ -12,8 +12,10 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import DataTable from "../../components/common/DataTable";
 import CustomTextField from "../../components/common/CustomTextField";
+import StudentForm from "./StudentForm";
 import type { DataTableHeader } from "../../components/common/DataTable";
 
 interface Student {
@@ -169,6 +171,7 @@ const StudentList: React.FC = () => {
   const [parentName, setParentName] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [religionFilter, setReligionFilter] = useState("");
+  const [isStudentFormOpen, setIsStudentFormOpen] = useState(false);
 
   const filteredRows = studentRows.filter((s) => {
     if (
@@ -215,6 +218,14 @@ const StudentList: React.FC = () => {
             below.
           </Typography>
         </Box>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<PersonAddAlt1Icon />}
+          onClick={() => setIsStudentFormOpen(true)}
+        >
+          Add Student
+        </Button>
       </Stack>
 
       <Accordion defaultExpanded sx={{ mb: 3, borderRadius: 0.5 }}>
@@ -315,6 +326,14 @@ const StudentList: React.FC = () => {
         emptyMessage="No students available"
         onRowClick={(student) => {
           console.log("Selected student", student.fullName);
+        }}
+      />
+
+      <StudentForm
+        open={isStudentFormOpen}
+        onClose={() => setIsStudentFormOpen(false)}
+        onSave={() => {
+          /* persist student data */
         }}
       />
     </Box>

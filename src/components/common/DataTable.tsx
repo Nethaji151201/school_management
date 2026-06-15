@@ -777,7 +777,30 @@ const DataTable = <T extends Record<string, any>>({
         </Box>
       </Box>
 
-      <TableContainer sx={{ maxHeight: scrollHeight, minHeight: 240 }}>
+      <TableContainer
+        sx={{
+          maxHeight: scrollHeight,
+          minHeight: 240,
+          "&::-webkit-scrollbar": {
+            height: "8px",
+            width: "8px",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.03)",
+            borderRadius: "4px",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: (theme) =>
+              theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.15)" : "rgba(0, 0, 0, 0.15)",
+            borderRadius: "4px",
+            "&:hover": {
+              backgroundColor: (theme) =>
+                theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.25)" : "rgba(0, 0, 0, 0.25)",
+            },
+          },
+        }}
+      >
         <Table
           stickyHeader
           sx={{
