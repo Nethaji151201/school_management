@@ -11,12 +11,13 @@ import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ModalForm, { type ModalFormTab } from "../common/ModalForm";
-import CustomTextField from "../common/CustomTextField";
-import CustomAutocomplete from "../common/CustomAutocomplete";
-import CustomDatePicker from "../common/CustomDatePicker";
-import { COLORS } from "../../theme/colors";
-import dayjs, { type Dayjs } from "dayjs";
+import ModalForm, { type ModalFormTab } from "../../common/ModalForm";
+import CustomTextField from "../../common/CustomTextField";
+import CustomTextarea from "../../common/CustomTextarea";
+import CustomAutocomplete from "../../common/CustomAutocomplete";
+import CustomDatePicker from "../../common/CustomDatePicker";
+import { COLORS } from "../../../theme/colors";
+import { type Dayjs } from "dayjs";
 import { alpha } from "@mui/material/styles";
 
 const STUDENT_TABS: ModalFormTab[] = [
@@ -105,10 +106,10 @@ const AddressFields: React.FC = () => (
       <CustomTextField placeholder="Email" type="email" />
     </FormRow>
     <FormRow label="Address 1" gridSpan={2}>
-      <CustomTextField placeholder="Address 1" />
+      <CustomTextarea placeholder="Address Line 1" rows={2} />
     </FormRow>
     <FormRow label="Address 2" gridSpan={2}>
-      <CustomTextField placeholder="Address 2" />
+      <CustomTextarea placeholder="Address Line 2" rows={2} />
     </FormRow>
     <FormRow label="City">
       <CustomTextField placeholder="City" />
@@ -253,7 +254,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="DOB"
                 value={dob}
                 onChange={setDob}
-                height={32}
               />
             </FormRow>
             <FormRow label="Gender">
@@ -262,7 +262,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Gender"
                 value={gender}
                 onChange={(_, val) => setGender(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Nationality">
@@ -271,7 +270,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Nationality"
                 value={nationality}
                 onChange={(_, val) => setNationality(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Religion">
@@ -280,7 +278,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Religion"
                 value={religion}
                 onChange={(_, val) => setReligion(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Community">
@@ -292,7 +289,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Community Type"
                 value={communityType}
                 onChange={(_, val) => setCommunityType(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Mother Tongue">
@@ -301,7 +297,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Mother Tongue"
                 value={motherTongue}
                 onChange={(_, val) => setMotherTongue(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Travel Mode">
@@ -310,7 +305,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Travel Mode"
                 value={travelMode}
                 onChange={(_, val) => setTravelMode(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Status">
@@ -319,7 +313,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Status"
                 value={status}
                 onChange={(_, val) => setStatus(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Class">
@@ -328,7 +321,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Class"
                 value={studentClass}
                 onChange={(_, val) => setStudentClass(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Section">
@@ -337,7 +329,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Section"
                 value={section}
                 onChange={(_, val) => setSection(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Academic Year">
@@ -346,7 +337,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Academic Year"
                 value={academicYear}
                 onChange={(_, val) => setAcademicYear(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Identification Marks" gridSpan={2}>
@@ -528,7 +518,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Blood Group"
                 value={bloodGroup}
                 onChange={(_, val) => setBloodGroup(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Height (Cms)">
@@ -557,7 +546,7 @@ const StudentForm: React.FC<StudentFormProps> = ({
                   <CustomTextField placeholder="Disability Percentage" />
                 </FormRow>
                 <FormRow label="Disability Description" gridSpan={2}>
-                  <CustomTextField placeholder="Disability Description" />
+                  <CustomTextarea placeholder="Disability Description" rows={2} />
                 </FormRow>
               </>
             )}
@@ -577,7 +566,7 @@ const StudentForm: React.FC<StudentFormProps> = ({
               <CustomTextField placeholder="Level" />
             </FormRow>
             <FormRow label="Achievement / Remarks" gridSpan={2}>
-              <CustomTextField placeholder="Achievement / Remarks" multiline rows={3} />
+              <CustomTextarea placeholder="Achievement / Remarks" rows={3} />
             </FormRow>
           </FormGrid>
         );
@@ -593,7 +582,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Date"
                 value={admissionDate}
                 onChange={setAdmissionDate}
-                height={32}
               />
             </FormRow>
             <FormRow label="Last Studied Class">
@@ -602,7 +590,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Class"
                 value={lastStudiedClass}
                 onChange={(_, val) => setLastStudiedClass(val || "")}
-                height={32}
               />
             </FormRow>
             <FormRow label="Last Exam & Result">
@@ -612,7 +599,7 @@ const StudentForm: React.FC<StudentFormProps> = ({
               <CustomTextField placeholder="Is Failed Remarks" />
             </FormRow>
             <FormRow label="Subjects Studied" gridSpan={2}>
-              <CustomTextField placeholder="Subjects Studied" multiline rows={2} />
+              <CustomTextarea placeholder="Subjects Studied" rows={2} />
             </FormRow>
             <FormRow label="Promoted To Class">
               <CustomTextField placeholder="Promoted To Class" />
@@ -643,7 +630,6 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Date"
                 value={transferAppDate}
                 onChange={setTransferAppDate}
-                height={32}
               />
             </FormRow>
             <FormRow label="Date of Transfer Certificate">
@@ -651,14 +637,13 @@ const StudentForm: React.FC<StudentFormProps> = ({
                 placeholder="Select Date"
                 value={tcDate}
                 onChange={setTcDate}
-                height={32}
               />
             </FormRow>
             <FormRow label="Reason for Leaving" gridSpan={2}>
-              <CustomTextField placeholder="Reason for Leaving" />
+              <CustomTextarea placeholder="Reason for Leaving" rows={2} />
             </FormRow>
             <FormRow label="Any Other Remarks" gridSpan={2}>
-              <CustomTextField placeholder="Any Other Remarks" multiline rows={2} />
+              <CustomTextarea placeholder="Any Other Remarks" rows={2} />
             </FormRow>
           </FormGrid>
         );

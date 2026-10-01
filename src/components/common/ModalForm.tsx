@@ -14,6 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import { alpha, styled } from "@mui/material/styles";
 import { motion, AnimatePresence } from "framer-motion";
+import { useThemeStore } from "../../store/themeStore";
 import { COLORS } from "../../theme/colors";
 
 const Header = styled(Box)(({ theme }) => ({
@@ -26,8 +27,6 @@ const Header = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid ${theme.palette.divider}`,
 }));
 
-// Tab styling definitions are handled inside the Tabs/Tab components inline
-
 const Footer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -39,33 +38,38 @@ const Footer = styled(Box)(({ theme }) => ({
 }));
 
 const RoundActionButton = styled(IconButton, {
-  shouldForwardProp: (prop) => prop !== "actionVariant",
-})<{ actionVariant?: "save" | "cancel" }>(({ actionVariant }) => ({
-  width: 44,
-  height: 44,
-  borderRadius: "50%",
-  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-  ...(actionVariant === "save"
-    ? {
-        backgroundColor: COLORS.primary,
-        color: "#fff",
-        "&:hover": {
-          backgroundColor: COLORS.primary,
-          transform: "scale(1.08) translateY(-2px)",
-          boxShadow: `0 6px 16px ${COLORS.primary}40`,
-        },
-      }
-    : {
-        backgroundColor: "rgba(100, 116, 139, 0.15)",
-        color: "rgba(100, 116, 139, 0.8)",
-        "&:hover": {
-          backgroundColor: "rgba(100, 116, 139, 0.25)",
-          transform: "scale(1.08) translateY(-2px)",
-          boxShadow: "0 6px 16px rgba(0, 0, 0, 0.08)",
-        },
-      }),
-}));
+  shouldForwardProp: (prop) => prop !== "actionVariant" && prop !== "customPrimary",
+})<{ actionVariant?: "save" | "cancel"; customPrimary?: string }>(
+  ({ actionVariant, customPrimary }) => {
+    const primary = customPrimary || COLORS.primary;
+    return {
+      width: 44,
+      height: 44,
+      borderRadius: "50%",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+      ...(actionVariant === "save"
+        ? {
+            backgroundColor: primary,
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: primary,
+              transform: "scale(1.08) translateY(-2px)",
+              boxShadow: `0 6px 16px ${alpha(primary, 0.4)}`,
+            },
+          }
+        : {
+            backgroundColor: "rgba(100, 116, 139, 0.15)",
+            color: "rgba(100, 116, 139, 0.8)",
+            "&:hover": {
+              backgroundColor: "rgba(100, 116, 139, 0.25)",
+              transform: "scale(1.08) translateY(-2px)",
+              boxShadow: "0 6px 16px rgba(0, 0, 0, 0.08)",
+            },
+          }),
+    };
+  },
+);
 
 const Transition = React.forwardRef(function Transition(
   props: SlideProps & { children?: React.ReactElement },
@@ -105,6 +109,9 @@ const ModalForm: React.FC<ModalFormProps> = ({
   headerIcon,
   children,
 }) => {
+  const { primaryColor } = useThemeStore();
+  const activePrimary = primaryColor || COLORS.primary;
+
   return (
     <Dialog
       open={open}
@@ -125,19 +132,27 @@ const ModalForm: React.FC<ModalFormProps> = ({
       }}
     >
       <Header>
-        <Typography variant="h6" sx={{ fontWeight: 800, color: "text.primary", letterSpacing: "-0.01em" }}>
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 800,
+            color: "text.primary",
+            letterSpacing: "-0.01em",
+            fontFamily: '"Roboto", sans-serif',
+          }}
+        >
           {title}
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           {headerIcon}
-          <IconButton 
-            onClick={onClose} 
-            size="small" 
+          <IconButton
+            onClick={onClose}
+            size="small"
             aria-label="Close dialog"
-            sx={{ 
-              color: "text.secondary", 
+            sx={{
+              color: "text.secondary",
               "&:hover": { color: COLORS.danger },
-              transition: "color 0.2s"
+              transition: "color 0.2s",
             }}
           >
             <CloseIcon sx={{ fontSize: 20 }} />
@@ -163,7 +178,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
             sx={{
               minHeight: "auto",
               "& .MuiTabs-indicator": {
-                display: "none", // Hide default underline indicator
+                display: "none",
               },
               "& .MuiTabs-flexContainer": {
                 gap: 1.25,
@@ -181,16 +196,17 @@ const ModalForm: React.FC<ModalFormProps> = ({
                   textTransform: "none",
                   fontWeight: 650,
                   fontSize: "0.85rem",
+                  fontFamily: '"Roboto", sans-serif',
                   borderRadius: "20px",
                   color: "text.secondary",
                   px: 2.2,
-                  py: 1,
+                  py: 0.8,
                   whiteSpace: "nowrap",
                   transition: "all 0.2s ease-in-out",
                   "&.Mui-selected": {
                     color: "#fff !important",
-                    backgroundColor: COLORS.primary,
-                    boxShadow: `0 4px 12px ${COLORS.primary}35`,
+                    backgroundColor: activePrimary,
+                    boxShadow: `0 4px 12px ${alpha(activePrimary, 0.35)}`,
                   },
                   "&:hover:not(.Mui-selected)": {
                     color: "text.primary",
@@ -203,28 +219,43 @@ const ModalForm: React.FC<ModalFormProps> = ({
         </Box>
       )}
 
+      {/* Center Content with Static Fixed Height (card height does not change on tab switch) */}
       <DialogContent
         sx={{
           p: 0,
           backgroundColor: "background.paper",
-          minHeight: 420,
+          height: 480,
+          minHeight: 480,
+          maxHeight: 480,
+          overflowY: "auto",
+          overflowX: "hidden",
+          "&::-webkit-scrollbar": {
+            width: "6px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "rgba(100, 116, 139, 0.2)",
+            borderRadius: "4px",
+          },
         }}
       >
         <Box
           sx={{
-            p: 4,
-            minHeight: 380,
-            overflowX: "hidden",
+            p: 3.5,
+            minHeight: "100%",
+            boxSizing: "border-box",
           }}
         >
           {activeTab ? (
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}
-                initial={{ opacity: 0, x: 15 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -15 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
                 style={{ width: "100%" }}
               >
                 {children}
@@ -246,6 +277,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
         </RoundActionButton>
         <RoundActionButton
           actionVariant="save"
+          customPrimary={activePrimary}
           onClick={onSave}
           aria-label="Save"
         >

@@ -9,26 +9,32 @@ import {
   MenuItem,
   Divider,
   Typography,
-  Stack,
-  Chip,
+  Tooltip,
 } from "@mui/material";
-import * as MuiIcons from "@mui/icons-material";
-import { motion } from "framer-motion";
+import TuneIcon from "@mui/icons-material/Tune";
+import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
+import SchoolIcon from "@mui/icons-material/School";
+import LogoutIcon from "@mui/icons-material/Logout";
+import PersonIcon from "@mui/icons-material/Person";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useThemeStore } from "../../store/themeStore";
 import { useSidebarStore } from "../../store/menuStore";
-import { COLORS } from "../../theme/colors";
+import { SchoolConfig } from "../../constants/schoolConfig";
+import ThemeSettingsDrawer from "../theme/ThemeSettingsDrawer";
 
 const Header: React.FC = () => {
-  const { mode, toggleTheme } = useThemeStore();
+  const {
+    baseMode,
+    headerColor,
+    headerType,
+    primaryColor,
+    toggleSettingPanel,
+  } = useThemeStore();
   const { isCollapsed } = useSidebarStore();
-  const isDark = mode === "dark";
+  const isDark = baseMode === "dark";
 
-  const [notificationAnchor, setNotificationAnchor] =
-    useState<null | HTMLElement>(null);
-  const [academicYearAnchor, setAcademicYearAnchor] =
-    useState<null | HTMLElement>(null);
+  const [notificationAnchor, setNotificationAnchor] = useState<null | HTMLElement>(null);
   const [avatarAnchor, setAvatarAnchor] = useState<null | HTMLElement>(null);
-  const [searchValue, setSearchValue] = useState("");
 
   const notifications = [
     {
@@ -36,327 +42,236 @@ const Header: React.FC = () => {
       title: "Fees Payment Received",
       message: "Student John Doe paid ₹5000",
       timestamp: "2 mins ago",
-      read: false,
     },
     {
       id: 2,
       title: "Attendance Alert",
       message: "5 students absent today",
       timestamp: "1 hour ago",
-      read: true,
     },
     {
       id: 3,
       title: "Exam Schedule Updated",
       message: "Final exams schedule has been updated",
       timestamp: "3 hours ago",
-      read: true,
     },
-  ];
-
-  const academicYears = [
-    { id: 1, year: "2024-2025", isActive: true },
-    { id: 2, year: "2023-2024", isActive: false },
-    { id: 3, year: "2022-2023", isActive: false },
   ];
 
   const handleClose = () => {
     setNotificationAnchor(null);
-    setAcademicYearAnchor(null);
     setAvatarAnchor(null);
   };
 
-  const marginLeft = isCollapsed ? 64 : 248;
+  const sidebarWidth = isCollapsed ? 72 : 260;
 
-  const headerBg = isDark
-    ? "rgba(15, 23, 42, 0.82)"
-    : "rgba(255, 255, 255, 0.92)";
-  const borderColor = isDark ? "rgba(255,255,255,0.12)" : "rgba(15,23,42,0.1)";
-  const headerShadow = isDark
-    ? "0 26px 70px rgba(0,0,0,0.24)"
-    : "0 20px 52px rgba(15,23,42,0.08)";
-  const textColor = isDark ? "#e2e8f0" : "#22354d";
-  const subTextColor = isDark ? "#cbd5e1" : "#6b7280";
-  const inputBg = isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.98)";
+  // Determine text color based on header background
+  const isLightHeader =
+    headerType === "solid" && (headerColor === "#FFFFFF" || headerColor.toLowerCase() === "#fff");
+  
+  const textColor = isLightHeader
+    ? isDark
+      ? "#0F172A"
+      : "#0F172A"
+    : "#FFFFFF";
+  
+  const subTextColor = isLightHeader ? "#64748B" : "rgba(255, 255, 255, 0.75)";
+  const iconColor = isLightHeader ? "#475569" : "rgba(255, 255, 255, 0.9)";
+  const borderColor = isDark ? "rgba(255, 255, 255, 0.08)" : "#E2E8F0";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <>
       <AppBar
         position="fixed"
         elevation={0}
         sx={{
-          ml: `${marginLeft}px`,
-          width: `calc(100% - ${marginLeft}px)`,
+          ml: `${sidebarWidth}px`,
+          width: `calc(100% - ${sidebarWidth}px)`,
           transition: "margin-left 0.3s ease-in-out, width 0.3s ease-in-out",
-          backgroundColor: headerBg,
-          backgroundImage: isDark
-            ? "linear-gradient(180deg, rgba(15,23,42,0.96) 0%, rgba(15,23,42,0.82) 100%)"
-            : "linear-gradient(180deg, rgba(255,255,255,0.99) 0%, rgba(248,250,252,0.92) 100%)",
+          backgroundColor: headerType === "solid" ? headerColor : undefined,
+          backgroundImage: headerType === "gradient" ? headerColor : undefined,
           borderBottom: `1px solid ${borderColor}`,
-          boxShadow: headerShadow,
+          boxShadow: isDark
+            ? "0 2px 10px rgba(0,0,0,0.3)"
+            : "0 1px 4px rgba(15,23,42,0.06)",
           color: textColor,
-          backdropFilter: "blur(22px)",
-          WebkitBackdropFilter: "blur(22px)",
-          borderRadius: "16px 16px 16px 16px",
+          zIndex: 1100,
         }}
       >
-        <Toolbar sx={{ minHeight: "64px !important" }}>
-          {/* Left: Search Bar */}
-          <Box sx={{ flex: 1, maxWidth: 440 }}>
+        <Toolbar
+          sx={{
+            minHeight: "64px !important",
+            px: { xs: 2, sm: 3 },
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          {/* Left: School Logo & Title (Medsky Style) */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <Box
               sx={{
+                width: 38,
+                height: 38,
+                borderRadius: "10px",
+                backgroundColor: primaryColor,
+                color: "#FFFFFF",
                 display: "flex",
                 alignItems: "center",
-                backgroundColor: inputBg,
-                borderRadius: "22px",
-                px: 2.5,
-                py: 1,
-                gap: 1,
-                border: `1px solid ${borderColor}`,
-                transition: "all 0.25s ease",
-                boxShadow: isDark
-                  ? "inset 0 3px 18px rgba(255,255,255,0.06)"
-                  : "inset 0 3px 18px rgba(15,23,42,0.06)",
-                backdropFilter: "blur(18px)",
-                WebkitBackdropFilter: "blur(18px)",
-                "&:focus-within": {
-                  borderColor: COLORS.primary,
-                  backgroundColor: isDark
-                    ? "rgba(255,255,255,0.18)"
-                    : "rgba(255,255,255,1)",
-                  boxShadow: `0 0 0 3px ${COLORS.primary}18`,
-                },
+                justifyContent: "center",
+                boxShadow: `0 2px 8px ${primaryColor}40`,
+                flexShrink: 0,
               }}
             >
-              <input
-                type="text"
-                placeholder="Type here to search..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                style={{
-                  border: "none",
-                  outline: "none",
-                  backgroundColor: "transparent",
-                  color: textColor,
-                  fontSize: "0.875rem",
-                  flex: 1,
-                  fontFamily: "inherit",
-                }}
-              />
-              <MuiIcons.Search
+              <SchoolIcon sx={{ fontSize: 22 }} />
+            </Box>
+
+            <Box>
+              <Typography
                 sx={{
-                  fontSize: 18,
-                  color: COLORS.primary,
-                  backgroundColor: isDark
-                    ? "rgba(255,255,255,0.12)"
-                    : "rgba(37,99,235,0.12)",
-                  borderRadius: "50%",
-                  p: 0.7,
-                  flexShrink: 0,
+                  fontWeight: 800,
+                  fontSize: { xs: "0.95rem", sm: "1.05rem" },
+                  color: textColor,
+                  lineHeight: 1.2,
+                  letterSpacing: "-0.01em",
                 }}
-              />
+              >
+                {SchoolConfig.schoolName}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: "0.72rem",
+                  color: subTextColor,
+                  fontWeight: 500,
+                  lineHeight: 1.1,
+                  display: { xs: "none", sm: "block" },
+                }}
+              >
+                Main Branch, Healthcare & Education Campus, City
+              </Typography>
             </Box>
           </Box>
 
-          {/* Right: Actions + Profile */}
-          <Stack
-            direction="row"
-            spacing={0.5}
-            sx={{ alignItems: "center", ml: "auto" }}
-          >
-            {/* Academic Year */}
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Chip
-                label="2024-2025"
-                onClick={(e) => setAcademicYearAnchor(e.currentTarget)}
-                icon={
-                  <MuiIcons.CalendarMonth
-                    sx={{ fontSize: "16px !important" }}
-                  />
-                }
-                size="small"
-                sx={{
-                  backgroundColor: `${COLORS.primary}14`,
-                  color: COLORS.primary,
-                  border: `1px solid ${COLORS.primary}30`,
-                  fontWeight: 600,
-                  fontSize: "0.78rem",
-                  cursor: "pointer",
-                  px: 0.5,
-                  "&:hover": { backgroundColor: `${COLORS.primary}22` },
-                }}
-              />
-            </motion.div>
-
-            <Divider
-              orientation="vertical"
-              flexItem
-              sx={{ mx: 0.5, height: 24, alignSelf: "center", borderColor }}
-            />
-
-            {/* Theme Toggle */}
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+          {/* Right: Actions, Setting Panel Toggle & User Profile */}
+          <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
+            {/* Setting Panel Toggle Button */}
+            <Tooltip title="Theme & Color Customizer">
               <IconButton
-                onClick={toggleTheme}
-                size="small"
+                onClick={toggleSettingPanel}
                 sx={{
-                  color: subTextColor,
+                  width: 38,
+                  height: 38,
+                  borderRadius: "8px",
+                  backgroundColor: isLightHeader
+                    ? isDark
+                      ? "#1E293B"
+                      : "#F1F5F9"
+                    : "rgba(255, 255, 255, 0.15)",
+                  color: iconColor,
+                  transition: "all 0.2s",
                   "&:hover": {
-                    backgroundColor: inputBg,
-                    color: COLORS.primary,
+                    backgroundColor: isLightHeader
+                      ? isDark
+                        ? "#334155"
+                        : "#E2E8F0"
+                      : "rgba(255, 255, 255, 0.25)",
+                    transform: "rotate(45deg)",
                   },
                 }}
               >
-                {isDark ? (
-                  <MuiIcons.LightMode sx={{ fontSize: 20 }} />
-                ) : (
-                  <MuiIcons.DarkMode sx={{ fontSize: 20 }} />
-                )}
+                <TuneIcon sx={{ fontSize: 20 }} />
               </IconButton>
-            </motion.div>
+            </Tooltip>
 
             {/* Notifications */}
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+            <Tooltip title="Notifications">
               <IconButton
                 onClick={(e) => setNotificationAnchor(e.currentTarget)}
-                size="small"
                 sx={{
-                  color: subTextColor,
+                  width: 38,
+                  height: 38,
+                  borderRadius: "8px",
+                  backgroundColor: isLightHeader
+                    ? isDark
+                      ? "#1E293B"
+                      : "#F1F5F9"
+                    : "rgba(255, 255, 255, 0.15)",
+                  color: iconColor,
                   "&:hover": {
-                    backgroundColor: inputBg,
-                    color: COLORS.primary,
+                    backgroundColor: isLightHeader
+                      ? isDark
+                        ? "#334155"
+                        : "#E2E8F0"
+                      : "rgba(255, 255, 255, 0.25)",
                   },
                 }}
               >
-                <Badge
-                  badgeContent={2}
-                  sx={{
-                    "& .MuiBadge-badge": {
-                      backgroundColor: "#ef4444",
-                      color: "#fff",
-                      fontSize: "0.6rem",
-                      minWidth: 16,
-                      height: 16,
-                    },
-                  }}
-                >
-                  <MuiIcons.NotificationsOutlined sx={{ fontSize: 20 }} />
+                <Badge badgeContent={3} color="error">
+                  <NotificationsNoneIcon sx={{ fontSize: 20 }} />
                 </Badge>
               </IconButton>
-            </motion.div>
+            </Tooltip>
 
-            {/* Email */}
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-              <IconButton
-                size="small"
-                sx={{
-                  color: subTextColor,
-                  "&:hover": {
-                    backgroundColor: inputBg,
-                    color: COLORS.primary,
-                  },
-                }}
-              >
-                <MuiIcons.MailOutlined sx={{ fontSize: 20 }} />
-              </IconButton>
-            </motion.div>
-
-            <Divider
-              orientation="vertical"
-              flexItem
-              sx={{ mx: 0.5, height: 24, alignSelf: "center", borderColor }}
-            />
-
-            {/* User Profile */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            {/* User Profile Avatar (Medsky Style) */}
+            <Box
+              onClick={(e) => setAvatarAnchor(e.currentTarget)}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.2,
+                cursor: "pointer",
+                p: 0.5,
+                borderRadius: "10px",
+                transition: "all 0.2s",
+                "&:hover": {
+                  backgroundColor: isLightHeader
+                    ? isDark
+                      ? "rgba(255,255,255,0.05)"
+                      : "rgba(0,0,0,0.04)"
+                    : "rgba(255,255,255,0.12)",
+                },
+              }}
+            >
               <Box
-                onClick={(e) => setAvatarAnchor(e.currentTarget)}
                 sx={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: "50%",
+                  backgroundColor: primaryColor,
+                  color: "#FFFFFF",
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
-                  cursor: "pointer",
-                  pl: 0.5,
-                  pr: 1,
-                  py: 0.5,
-                  borderRadius: "12px",
-                  "&:hover": { backgroundColor: inputBg },
-                  transition: "all 0.2s",
+                  justifyContent: "center",
+                  boxShadow: `0 2px 6px ${primaryColor}50`,
                 }}
               >
-                {/* Avatar */}
-                <Box
+                NE
+              </Box>
+
+              <Box sx={{ display: { xs: "none", md: "block" }, textAlign: "left" }}>
+                <Typography
                   sx={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: "50%",
-                    background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.secondary} 100%)`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#fff",
                     fontWeight: 700,
-                    fontSize: "0.8rem",
-                    flexShrink: 0,
-                    boxShadow: `0 2px 8px ${COLORS.primary}40`,
+                    fontSize: "0.85rem",
+                    color: textColor,
+                    lineHeight: 1.1,
                   }}
                 >
-                  AD
-                </Box>
-
-                {/* Name + Status */}
-                <Box sx={{ display: { xs: "none", sm: "block" } }}>
-                  <Typography
-                    sx={{
-                      fontSize: "0.85rem",
-                      fontWeight: 700,
-                      color: textColor,
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Admin User
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.4,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: 7,
-                        height: 7,
-                        borderRadius: "50%",
-                        backgroundColor: "#22c55e",
-                      }}
-                    />
-                    <Typography
-                      sx={{
-                        fontSize: "0.68rem",
-                        color: "#22c55e",
-                        fontWeight: 600,
-                      }}
-                    >
-                      Available
-                    </Typography>
-                  </Box>
-                </Box>
-
-                <MuiIcons.ExpandMore
+                  Nethaji
+                </Typography>
+                <Typography
                   sx={{
-                    fontSize: 18,
+                    fontSize: "0.7rem",
                     color: subTextColor,
-                    display: { xs: "none", sm: "flex" },
+                    lineHeight: 1.1,
                   }}
-                />
+                >
+                  Administrator
+                </Typography>
               </Box>
-            </motion.div>
-          </Stack>
+            </Box>
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -365,174 +280,107 @@ const Header: React.FC = () => {
         anchorEl={notificationAnchor}
         open={Boolean(notificationAnchor)}
         onClose={handleClose}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         slotProps={{
           paper: {
             sx: {
-              mt: 1,
-              minWidth: 340,
-              backgroundColor: headerBg,
-              border: `1px solid ${borderColor}`,
-              borderRadius: "16px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+              width: 320,
+              maxHeight: 400,
+              borderRadius: "12px",
+              boxShadow: isDark
+                ? "0 10px 30px rgba(0,0,0,0.6)"
+                : "0 10px 30px rgba(15,23,42,0.12)",
+              p: 1,
+              backgroundColor: isDark ? "#111827" : "#FFFFFF",
+              color: isDark ? "#F8FAFC" : "#0F172A",
             },
           },
         }}
       >
-        <Box sx={{ px: 2, pt: 2, pb: 1 }}>
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 700, fontSize: "1rem", color: textColor }}
-          >
+        <Box sx={{ p: 1.5, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "0.9rem" }}>
             Notifications
           </Typography>
-        </Box>
-        <Divider sx={{ borderColor }} />
-        {notifications.map((n) => (
-          <MenuItem
-            key={n.id}
-            onClick={handleClose}
-            sx={{
-              py: 1.5,
-              px: 2,
-              alignItems: "flex-start",
-              gap: 1,
-              borderBottom: `1px solid ${borderColor}`,
-            }}
-          >
-            <Box
-              sx={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                backgroundColor: n.read ? "transparent" : COLORS.primary,
-                mt: 0.8,
-                flexShrink: 0,
-              }}
-            />
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                sx={{ fontSize: "0.85rem", fontWeight: 600, color: textColor }}
-              >
-                {n.title}
-              </Typography>
-              <Typography sx={{ fontSize: "0.75rem", color: subTextColor }}>
-                {n.message}
-              </Typography>
-              <Typography
-                sx={{ fontSize: "0.7rem", color: subTextColor, mt: 0.3 }}
-              >
-                {n.timestamp}
-              </Typography>
-            </Box>
-          </MenuItem>
-        ))}
-        <MenuItem
-          onClick={handleClose}
-          sx={{ justifyContent: "center", py: 1.5 }}
-        >
-          <Typography
-            sx={{ fontSize: "0.85rem", color: COLORS.primary, fontWeight: 600 }}
-          >
-            View All Notifications
+          <Typography sx={{ fontSize: "0.75rem", color: primaryColor, cursor: "pointer", fontWeight: 600 }}>
+            Mark all as read
           </Typography>
-        </MenuItem>
-      </Menu>
-
-      {/* Academic Year Menu */}
-      <Menu
-        anchorEl={academicYearAnchor}
-        open={Boolean(academicYearAnchor)}
-        onClose={handleClose}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        slotProps={{
-          paper: {
-            sx: {
-              mt: 1,
-              minWidth: 180,
-              backgroundColor: headerBg,
-              border: `1px solid ${borderColor}`,
-              borderRadius: "14px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-            },
-          },
-        }}
-      >
-        {academicYears.map((year) => (
+        </Box>
+        <Divider sx={{ my: 0.5 }} />
+        {notifications.map((item) => (
           <MenuItem
-            key={year.id}
+            key={item.id}
             onClick={handleClose}
             sx={{
-              py: 1,
-              px: 2,
-              borderLeft: year.isActive
-                ? `3px solid ${COLORS.primary}`
-                : "3px solid transparent",
-              backgroundColor: year.isActive
-                ? `${COLORS.primary}0f`
-                : "transparent",
+              borderRadius: "8px",
+              my: 0.5,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              p: 1.2,
             }}
           >
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              {year.isActive && (
-                <MuiIcons.Check sx={{ fontSize: 15, color: COLORS.primary }} />
-              )}
-              <Typography
-                sx={{
-                  fontSize: "0.875rem",
-                  color: year.isActive ? COLORS.primary : textColor,
-                }}
-              >
-                {year.year}
-              </Typography>
-            </Stack>
+            <Typography sx={{ fontWeight: 600, fontSize: "0.82rem" }}>
+              {item.title}
+            </Typography>
+            <Typography sx={{ fontSize: "0.75rem", color: "#64748B", my: 0.3 }}>
+              {item.message}
+            </Typography>
+            <Typography sx={{ fontSize: "0.68rem", color: "#94A3B8" }}>
+              {item.timestamp}
+            </Typography>
           </MenuItem>
         ))}
       </Menu>
 
-      {/* Avatar Menu */}
+      {/* User Profile Menu */}
       <Menu
         anchorEl={avatarAnchor}
         open={Boolean(avatarAnchor)}
         onClose={handleClose}
-        transformOrigin={{ horizontal: "right", vertical: "top" }}
-        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         slotProps={{
           paper: {
             sx: {
-              mt: 1,
-              minWidth: 180,
-              backgroundColor: headerBg,
-              border: `1px solid ${borderColor}`,
-              borderRadius: "14px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+              width: 200,
+              borderRadius: "12px",
+              boxShadow: isDark
+                ? "0 10px 30px rgba(0,0,0,0.6)"
+                : "0 10px 30px rgba(15,23,42,0.12)",
+              p: 0.5,
+              backgroundColor: isDark ? "#111827" : "#FFFFFF",
+              color: isDark ? "#F8FAFC" : "#0F172A",
             },
           },
         }}
       >
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
-          <MuiIcons.Person sx={{ fontSize: 18, color: subTextColor }} />
-          <Typography sx={{ fontSize: "0.875rem", color: textColor }}>
-            Profile
+        <Box sx={{ p: 1.5 }}>
+          <Typography sx={{ fontWeight: 700, fontSize: "0.88rem" }}>
+            Nethaji
           </Typography>
+          <Typography sx={{ fontSize: "0.72rem", color: "#64748B" }}>
+            nethaji@school.edu
+          </Typography>
+        </Box>
+        <Divider sx={{ my: 0.5 }} />
+        <MenuItem onClick={handleClose} sx={{ borderRadius: "6px", fontSize: "0.82rem", gap: 1 }}>
+          <PersonIcon sx={{ fontSize: 18 }} /> My Profile
         </MenuItem>
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
-          <MuiIcons.Settings sx={{ fontSize: 18, color: subTextColor }} />
-          <Typography sx={{ fontSize: "0.875rem", color: textColor }}>
-            Settings
-          </Typography>
+        <MenuItem
+          onClick={() => {
+            handleClose();
+            toggleSettingPanel();
+          }}
+          sx={{ borderRadius: "6px", fontSize: "0.82rem", gap: 1 }}
+        >
+          <SettingsIcon sx={{ fontSize: 18 }} /> Settings & Theme
         </MenuItem>
-        <Divider sx={{ borderColor }} />
-        <MenuItem onClick={handleClose} sx={{ gap: 1.5, py: 1 }}>
-          <MuiIcons.Logout sx={{ fontSize: 18, color: "#ef4444" }} />
-          <Typography sx={{ fontSize: "0.875rem", color: "#ef4444" }}>
-            Logout
-          </Typography>
+        <Divider sx={{ my: 0.5 }} />
+        <MenuItem onClick={handleClose} sx={{ borderRadius: "6px", fontSize: "0.82rem", color: "#EF4444", gap: 1 }}>
+          <LogoutIcon sx={{ fontSize: 18 }} /> Logout
         </MenuItem>
       </Menu>
-    </motion.div>
+
+      {/* Theme Customizer Drawer */}
+      <ThemeSettingsDrawer />
+    </>
   );
 };
 

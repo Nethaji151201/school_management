@@ -17,6 +17,8 @@
     "@mui/material": "^9.1.0",
     "@mui/x-date-pickers": "^9.5.0",
     "@tanstack/react-query": "^5.101.0",
+    "ag-grid-community": "^36.0.1",
+    "ag-grid-react": "^36.0.1",
     "axios": "^1.17.0",
     "bootstrap": "^5.3.8",
     "dayjs": "^1.11.21",

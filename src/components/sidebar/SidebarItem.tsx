@@ -11,8 +11,8 @@ import {
 import * as MuiIcons from "@mui/icons-material";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMenuStore } from "../../store/menuStore";
+import { useThemeStore } from "../../store/themeStore";
 import { type MenuItem } from "../../types";
-import { COLORS } from "../../theme/colors";
 import { useLocation } from "react-router-dom";
 
 interface SidebarItemProps {
@@ -29,6 +29,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   isCollapsed = false,
 }) => {
   const { expandedMenus, toggleMenuExpand } = useMenuStore();
+  const { primaryColor } = useThemeStore();
   const location = useLocation();
 
   const isChildActive = (menuItem: MenuItem): boolean => {
@@ -88,7 +89,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
                 <IconComponent
                   fontSize="small"
                   sx={{
-                    color: isActive ? COLORS.primary : "rgba(255,255,255,0.8)",
+                    color: isActive ? primaryColor : "rgba(255,255,255,0.8)",
                   }}
                 />
               ) : (
@@ -142,7 +143,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
                   minWidth: 34,
                   color:
                     isActive && !item.children
-                      ? COLORS.primary
+                      ? primaryColor
                       : isActive && item.children
                         ? "#fff"
                         : "rgba(255,255,255,0.75)",
@@ -161,7 +162,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
                     fontSize: isActive ? 8 : 5,
                     color:
                       isActive && !item.children
-                        ? COLORS.primary
+                        ? primaryColor
                         : "rgba(255,255,255,0.5)",
                     transition: "all 0.2s",
                   }}
@@ -183,7 +184,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
                           : 500,
                     color:
                       isActive && !item.children
-                        ? COLORS.primary
+                        ? primaryColor
                         : "rgba(255,255,255,0.85)",
                     transition: "all 0.2s",
                     whiteSpace: "nowrap",
@@ -202,7 +203,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
                   height: 18,
                   minWidth: 18,
                   fontSize: "0.65rem",
-                  backgroundColor: COLORS.warning,
+                  backgroundColor: "#F59E0B",
                   color: "#fff",
                   mr: 0.5,
                 }}

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { BrowserRouter } from "react-router-dom";
@@ -7,14 +8,37 @@ import AppRoutes from "./routes/AppRoutes";
 import { useThemeStore } from "./store/themeStore";
 
 function AppContent() {
-  const { mode } = useThemeStore();
-  const theme = createTheme(getTheme(mode));
+  const { mode, baseMode, primaryColor, secondaryColor, activePreset } = useThemeStore();
+
+  const theme = useMemo(
+    () =>
+      createTheme(
+        getTheme({
+          mode,
+          baseMode,
+          primaryColor,
+          secondaryColor,
+          activePreset,
+        }),
+      ),
+    [mode, baseMode, primaryColor, secondaryColor, activePreset],
+  );
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AppRoutes />
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            borderRadius: "8px",
+            background: "#0F172A",
+            color: "#FFFFFF",
+            fontSize: "0.85rem",
+          },
+        }}
+      />
     </ThemeProvider>
   );
 }

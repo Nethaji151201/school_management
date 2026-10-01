@@ -9,7 +9,7 @@ export interface CustomAutocompleteProps<
   FreeSolo extends boolean | undefined = false
 > extends Omit<AutocompleteProps<T, Multiple, DisableClearable, FreeSolo>, "renderInput"> {
   placeholder?: string;
-  width?: string | number;
+  width?: string | number | Record<string, string | number>;
   height?: string | number;
   error?: boolean;
   helperText?: React.ReactNode;
@@ -23,7 +23,7 @@ export const CustomAutocomplete = <
 >({
   placeholder,
   width = "100%",
-  height = 32,
+  height = 36,
   error,
   helperText,
   sx,
@@ -33,15 +33,15 @@ export const CustomAutocomplete = <
     <Autocomplete
       {...props}
       sx={{
-        width,
+        width: (width as any) ?? "100%",
         ...sx,
-        // Synchronize Autocomplete layout with CustomTextField design system
         "& .MuiOutlinedInput-root": {
-          padding: "0 36px 0 8px !important", // Spacing for endAdornments (clear + arrows)
+          padding: "0 34px 0 6px !important",
           minHeight: height,
+          height: height,
         },
         "& .MuiAutocomplete-endAdornment": {
-          right: "8px !important",
+          right: "6px !important",
         },
       }}
       renderInput={(params) => (
@@ -53,7 +53,7 @@ export const CustomAutocomplete = <
           height={height}
           sx={{
             "& .MuiOutlinedInput-root": {
-              height: "auto",
+              height: height,
             },
           }}
         />

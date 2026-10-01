@@ -1,4 +1,4 @@
-import StudentList from "../../components/students/studentList";
+import StudentList from "../../components/students/student-menu/studentList";
 
 const StudentListPage = () => {
   return (

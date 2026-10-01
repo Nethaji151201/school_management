@@ -4,7 +4,6 @@ import {
   Container,
   Grid,
   Card,
-  TextField,
   Button,
   Typography,
   Stack,
@@ -20,6 +19,8 @@ import * as MuiIcons from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { useThemeStore } from "../../store/themeStore";
 import { COLORS } from "../../theme/colors";
+
+import CustomTextField from "../../components/common/CustomTextField";
 
 const Login: React.FC = () => {
   const { mode, toggleTheme } = useThemeStore();
@@ -254,13 +255,12 @@ const Login: React.FC = () => {
                 <form onSubmit={handleLogin}>
                   <Stack spacing={2}>
                     {/* Email */}
-                    <TextField
-                      fullWidth
+                    <CustomTextField
                       type="email"
-                      label="Email Address"
                       placeholder="admin@school.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      height={44}
                       slotProps={{
                         input: {
                           startAdornment: (
@@ -274,23 +274,15 @@ const Login: React.FC = () => {
                           ),
                         },
                       }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          backgroundColor: isDark
-                            ? "rgba(255,255,255,0.05)"
-                            : "rgba(0,0,0,0.02)",
-                        },
-                      }}
                     />
 
                     {/* Password */}
-                    <TextField
-                      fullWidth
+                    <CustomTextField
                       type={showPassword ? "text" : "password"}
-                      label="Password"
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      height={44}
                       slotProps={{
                         input: {
                           startAdornment: (
@@ -317,13 +309,6 @@ const Login: React.FC = () => {
                               </IconButton>
                             </InputAdornment>
                           ),
-                        },
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          backgroundColor: isDark
-                            ? "rgba(255,255,255,0.05)"
-                            : "rgba(0,0,0,0.02)",
                         },
                       }}
                     />
